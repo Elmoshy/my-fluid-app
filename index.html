@@ -3,14 +3,112 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WebGL Fluid – Hover Draw</title>
-    <link rel="stylesheet" href="style.css" />
+    <title>WebGL Fluid — Hover Draw</title>
+    <style>
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #000;
+  cursor: none; /* hide pointer */
+}
+
+#fluid-canvas {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  touch-action: none; /* improves pointer events on touch devices */
+}
+
+/* --- الإضافات الجديدة --- */
+
+/* Made by ELMOSHY - Simple signature in bottom left */
+.signature {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 10;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 16px;
+  font-style: italic;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  cursor: default;
+}
+    </style>
   </head>
   <body>
     <canvas id="fluid-canvas"></canvas>
 
+    <!-- Made by ELMOSHY Signature -->
+    <div class="signature">Made by ELMOSHY</div>
+
     <!-- WebGL Fluid UMD (ESM support for PavelDoGreat/WebGL-Fluid-Simulation) -->
     <script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.3"></script>
-    <script src="script.js"></script>
+    <script>
+(function () {
+  const canvas = document.getElementById('fluid-canvas');
+  if (!canvas) {
+    console.error('Canvas element not found');
+    return;
+  }
+
+  // Function to resize the canvas and maintain high resolution on Retina/HiDPI displays
+  function resizeCanvas() {
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+    const { clientWidth, clientHeight } = canvas;
+    canvas.width = Math.floor(clientWidth * dpr);
+    canvas.height = Math.floor(clientHeight * dpr);
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  // Check if the WebGLFluid library is loaded
+  if (typeof WebGLFluid !== 'function') {
+    console.error('WebGLFluid library not loaded');
+    return;
+  }
+
+  // --- Main Simulation Configuration ---
+  const fluid = WebGLFluid(canvas, {
+    // Interaction settings
+    TRIGGER: 'hover', // The fluid reacts to mouse hover
+    IMMEDIATE: true,  // Show a single splat on load for an initial visual
+    AUTO: false,      // IMPORTANT: This is set to false to stop automatic splats
+    
+    // Simulation quality
+    SIM_RESOLUTION: 128,
+    DYE_RESOLUTION: 1024,
+    DENSITY_DISSIPATION: 1.0,
+    VELOCITY_DISSIPATION: 0.3,
+    PRESSURE: 0.8,
+    PRESSURE_ITERATIONS: 20,
+    CURL: 30,         // You can change this starting value (e.g., 10, 50)
+    
+    // Splat (the effect created by mouse) settings
+    SPLAT_RADIUS: 0.23,
+    SPLAT_FORCE: 6000,
+    SPLAT_COUNT: Math.floor(Math.random() * 20) + 5,
+    
+    // Visuals and effects
+    SHADING: true,
+    COLORFUL: true,
+    COLOR_UPDATE_SPEED: 9,
+    BACK_COLOR: { r: 0, g: 0, b: 0 },
+    TRANSPARENT: false,
+    BLOOM: true,
+    BLOOM_ITERATIONS: 8,
+    BLOOM_RESOLUTION: 256,
+    BLOOM_INTENSITY: 0.8,
+    BLOOM_THRESHOLD: 0.6,
+    BLOOM_SOFT_KNEE: 0.7,
+    SUNRAYS: true,
+    SUNRAYS_RESOLUTION: 196,
+    SUNRAYS_WEIGHT: 1.0,
+  });
+
+})();
+    </script>
   </body>
 </html>
