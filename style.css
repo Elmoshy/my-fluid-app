@@ -1,49 +1,255 @@
+/* CSS - الكود الجديد */
+
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow: hidden;
   background: #000;
-  cursor: none; /* hide pointer */
+  cursor: none; /* إخفاء مؤشر الماوس */
 }
 
 #fluid-canvas {
   width: 100vw;
   height: 100vh;
   display: block;
-  touch-action: none; /* improves pointer events on touch devices */
+  touch-action: none; /* تحسين التعامل مع اللمس */
 }
 
-/* --- الإضافات الجديدة --- */
-
-/* حاوية الزراير عشان تكون فوق الـ Canvas */
-.controls {
+/* القائمة المنبثقة الجانبية (Sidebar) */
+.sidebar {
   position: fixed;
-  top: 15px;
-  left: 15px;
-  z-index: 10;
-  display: flex;
-  gap: 10px;
-  background-color: rgba(0, 0, 0, 0.5);
-  padding: 10px;
-  border-radius: 10px;
-  /* نرجع شكل الماوس الطبيعي فوق الزراير */
-  cursor: default;
+  top: 50%; /* لتوسيط القائمة عمودياً */
+  right: -270px; /* القائمة مخفية تماماً الآن */
+  transform: translateY(-50%); /* إزاحة للأعلى عشان التوسيط يبقى دقيق */
+  width: 230px; /* حجم أصغر */
+  max-height: 90%; /* حجم عمودي أصغر */
+  background-color: rgba(0, 0, 0, 0.6); /* خلفية شفافة أكتر */
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+  transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 20;
+  color: #e0e0e0;
+  font-family: 'Cairo Play', sans-serif; /* الخط الجديد هنا */
+  overflow-y: auto; /* عشان لو المحتوى كان أكبر */
+  border-radius: 10px 0 0 10px; /* حواف دائرية على اليسار */
 }
 
-/* تنسيق الزراير */
-.controls button {
-  background-color: #333;
-  color: white;
-  border: 1px solid #555;
-  padding: 8px 15px;
+.sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 5px;
-  font-family: sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background-color 0.2s;
 }
 
-.controls button:hover {
+.sidebar.open {
+  right: 0; /* القائمة هتظهر */
+}
+
+/* زرار السهم المتحرك */
+.toggle-arrows {
+  position: fixed;
+  top: 50%;
+  right: 15px; /* مكان الزرار */
+  transform: translateY(-50%);
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 21;
+  transition: right 0.4s, transform 0.4s, color 0.3s;
+  animation: pulse-arrows 1.5s infinite ease-in-out; /* إضافة الحركة */
+}
+
+.toggle-arrows:hover {
+  color: #fff;
+}
+
+.sidebar.open + .toggle-arrows {
+  right: 270px; /* مكان السهم لما القائمة مفتوحة */
+  transform: translateY(-50%) rotateY(180deg); /* تدوير السهم عشان يشير للداخل */
+  animation: none; /* إيقاف الحركة عند الفتح */
+}
+
+@keyframes pulse-arrows {
+  0% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+  50% { transform: translateY(-50%) scale(1.1); opacity: 1; }
+  100% { transform: translateY(-50%) scale(1); opacity: 0.8; }
+}
+
+/* تنسيق العناوين (Headers) */
+.sidebar h3 {
+  color: #fff;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 5px;
+  text-align: right;
+}
+
+/* تنسيق كل عنصر في القائمة */
+.control-group {
+  margin-bottom: 18px;
+  display: flex;
+  flex-direction: column;
+  direction: rtl;
+}
+
+.control-group label {
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+/* حاوية الـ input مع الأزرار */
+.input-container {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  width: 100%;
+}
+
+/* تنسيق الـ input للأرقام */
+.control-group input[type="number"] {
+  flex-grow: 1;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  border-radius: 10px; /* حواف دائرية أكتر */
+  color: #fff;
+  padding: 8px;
+  text-align: right;
+  /* إخفاء الأسهم الافتراضية للمتصفح */
+  -moz-appearance: textfield;
+}
+
+.control-group input[type="number"]::-webkit-inner-spin-button, 
+.control-group input[type="number"]::-webkit-outer-spin-button { 
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* تنسيق السلايدر نفسه */
+.control-group input[type="range"] {
+    -webkit-appearance: none;
+    background: #333;
+    height: 10px; /* زيادة حجم السلايدر نفسه */
+    border-radius: 10px; /* حواف دائرية */
+    cursor: pointer;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+/* تصميم الزر الخاص بالسلايدر (Thumb) */
+.control-group input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    background: #bbb; /* لون رمادي فاتح */
+    border: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    transition: transform 0.2s, background-color 0.2s;
+    margin-top: -4px; /* لضبط مكانه */
+}
+
+.control-group input[type="range"]::-webkit-slider-thumb:hover {
+    background-color: #eee;
+    transform: scale(1.2); /* تكبير بسيط على الـ hover */
+}
+
+.control-group input[type="range"]::-moz-range-thumb {
+    background: #bbb;
+    border: none;
+    height: 18px;
+    width: 18px;
+    border-radius: 50%;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.control-group input[type="range"]::-moz-range-thumb:hover {
+    background-color: #eee;
+    transform: scale(1.2);
+}
+
+/* تنسيق الـ checkbox */
+.control-group input[type="checkbox"] {
+  margin-left: 10px;
+  margin-right: 0;
+  transform: scale(1.2);
+}
+
+/* تنسيق الأزرار (Buttons) */
+.control-group button {
+  width: 100%;
+  background-color: #444; /* لون رمادي غامق */
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 20px; /* حواف دائرية أكثر */
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 10px;
+  font-size: 15px;
+  font-family: 'Cairo Play', sans-serif; /* الخط الجديد هنا */
+}
+
+.control-group button:hover {
+  background-color: #666; /* لون أغمق عند الـ hover */
+  transform: translateY(-2px); /* تأثير رفع بسيط */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.control-group button:active {
+  transform: scale(0.98) translateY(0);
+  box-shadow: none;
+}
+
+/* تنسيق أزرار الزيادة والنقصان */
+.adjust-btn {
   background-color: #555;
+  border: none;
+  color: #fff;
+  font-size: 18px;
+  font-weight: bold;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%; /* زرار دائري */
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  padding: 0;
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.adjust-btn:hover {
+  background-color: #888;
+  transform: scale(1.1);
+}
+.adjust-btn:active {
+  transform: scale(0.95);
+}
+
+/* تنسيق النص اللي تحت (Made by...) - تم التعديل هنا */
+.credit {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Playfair Display', serif; /* الخط الجديد هنا */
+    font-size: 18px;
+    z-index: 10;
+    text-shadow: 0 0 5px rgba(0,0,0,0.5);
+    color: rgba(255, 255, 255, 0.5);
+}
+.credit a {
+    text-decoration: none; /* إزالة الخط اللي تحت اللينك */
+    transition: color 0.2s;
+    text-transform: uppercase; /* تحويل النص لحروف كبيرة */
+}
+.credit a:hover {
+    color: rgba(255, 255, 255, 0.8); /* لون أفتح عند الوقوف بالماوس */
 }
