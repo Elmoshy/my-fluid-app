@@ -3,112 +3,108 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>WebGL Fluid — Hover Draw</title>
-    <style>
-html, body {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  overflow: hidden;
-  background: #000;
-  cursor: none; /* hide pointer */
-}
-
-#fluid-canvas {
-  width: 100vw;
-  height: 100vh;
-  display: block;
-  touch-action: none; /* improves pointer events on touch devices */
-}
-
-/* --- الإضافات الجديدة --- */
-
-/* Made by ELMOSHY - Simple signature in bottom left */
-.signature {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  z-index: 10;
-  color: rgba(255, 255, 255, 0.7);
-  font-family: 'Georgia', 'Times New Roman', serif;
-  font-size: 16px;
-  font-style: italic;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  cursor: default;
-}
-    </style>
+    <title>محاكاة السائل - إعدادات عصرية</title>
+    <!-- خط Cairo Play و Playfair Display من Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo+Play:wght@400;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- Canvas للمحاكاة -->
     <canvas id="fluid-canvas"></canvas>
 
-    <!-- Made by ELMOSHY Signature -->
-    <div class="signature">Made by ELMOSHY</div>
+    <!-- القائمة الجانبية اللي فيها الإعدادات -->
+    <div class="sidebar">
+      <h3>جودة المحاكاة</h3>
+      <div class="control-group">
+        <label for="sim-res">دقة المحاكاة</label>
+        <input type="range" id="sim-res" min="64" max="256" step="64" value="128">
+        <button id="apply-sim-res">تطبيق</button>
+      </div>
+      <div class="control-group">
+        <label for="dye-res">دقة الألوان</label>
+        <input type="range" id="dye-res" min="512" max="2048" step="256" value="1024">
+        <button id="apply-dye-res">تطبيق</button>
+      </div>
+      <div class="control-group">
+        <label for="density-dissipation">تلاشي الكثافة</label>
+        <div class="input-container">
+          <input type="number" id="density-dissipation" step="0.1" value="1.0">
+          <button class="adjust-btn" data-target="density-dissipation" data-action="minus">-</button>
+          <button class="adjust-btn" data-target="density-dissipation" data-action="plus">+</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="velocity-dissipation">تلاشي السرعة</label>
+        <div class="input-container">
+          <input type="number" id="velocity-dissipation" step="0.1" value="0.3">
+          <button class="adjust-btn" data-target="velocity-dissipation" data-action="minus">-</button>
+          <button class="adjust-btn" data-target="velocity-dissipation" data-action="plus">+</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="pressure-iter">تكرارات الضغط</label>
+        <input type="range" id="pressure-iter" min="10" max="50" step="5" value="20">
+        <button id="apply-pressure-iter">تطبيق</button>
+      </div>
 
-    <!-- WebGL Fluid UMD (ESM support for PavelDoGreat/WebGL-Fluid-Simulation) -->
+      <h3>إعدادات التلطيخ</h3>
+      <div class="control-group">
+        <label for="splat-radius">نصف قطر التلطيخ</label>
+        <div class="input-container">
+          <input type="number" id="splat-radius" step="0.01" value="0.23">
+          <button class="adjust-btn" data-target="splat-radius" data-action="minus">-</button>
+          <button class="adjust-btn" data-target="splat-radius" data-action="plus">+</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="splat-force">قوة التلطيخ</label>
+        <div class="input-container">
+          <input type="number" id="splat-force" step="100" value="6000">
+          <button class="adjust-btn" data-target="splat-force" data-action="minus">-</button>
+          <button class="adjust-btn" data-target="splat-force" data-action="plus">+</button>
+        </div>
+      </div>
+      <div class="control-group">
+        <label for="curl-value">التجعد</label>
+        <input type="range" id="curl-value" min="0" max="100" step="1" value="30">
+        <button id="update-curl">تطبيق</button>
+      </div>
+
+      <h3>المؤثرات البصرية</h3>
+      <div class="control-group">
+        <label><input type="checkbox" id="shading-toggle"> التظليل</label>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="colorful-toggle"> متعدد الألوان</label>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="bloom-toggle"> الإضاءة الزائدة</label>
+      </div>
+      <div class="control-group">
+        <label><input type="checkbox" id="sunrays-toggle"> أشعة الشمس</label>
+      </div>
+
+      <h3>أوامر</h3>
+      <div class="control-group">
+        <button id="random-splats-btn">تلطيخ عشوائي</button>
+      </div>
+      <div class="control-group">
+        <button id="reset-btn">إعادة تشغيل المحاكاة</button>
+      </div>
+    </div>
+    
+    <!-- السهم المتحرك اللي بيفتح القائمة -->
+    <div class="toggle-arrows">&raquo;</div>
+
+    <!-- علامة "Made by" -->
+    <div class="credit">
+      by 𝙴𝙻𝙼𝙾𝚂𝙷𝚈
+    </div>
+
+    <!-- مكتبة الـ WebGL Fluid -->
     <script src="https://cdn.jsdelivr.net/npm/webgl-fluid@0.3"></script>
-    <script>
-(function () {
-  const canvas = document.getElementById('fluid-canvas');
-  if (!canvas) {
-    console.error('Canvas element not found');
-    return;
-  }
-
-  // Function to resize the canvas and maintain high resolution on Retina/HiDPI displays
-  function resizeCanvas() {
-    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
-    const { clientWidth, clientHeight } = canvas;
-    canvas.width = Math.floor(clientWidth * dpr);
-    canvas.height = Math.floor(clientHeight * dpr);
-  }
-  window.addEventListener('resize', resizeCanvas);
-  resizeCanvas();
-
-  // Check if the WebGLFluid library is loaded
-  if (typeof WebGLFluid !== 'function') {
-    console.error('WebGLFluid library not loaded');
-    return;
-  }
-
-  // --- Main Simulation Configuration ---
-  const fluid = WebGLFluid(canvas, {
-    // Interaction settings
-    TRIGGER: 'hover', // The fluid reacts to mouse hover
-    IMMEDIATE: true,  // Show a single splat on load for an initial visual
-    AUTO: false,      // IMPORTANT: This is set to false to stop automatic splats
-    
-    // Simulation quality
-    SIM_RESOLUTION: 128,
-    DYE_RESOLUTION: 1024,
-    DENSITY_DISSIPATION: 1.0,
-    VELOCITY_DISSIPATION: 0.3,
-    PRESSURE: 0.8,
-    PRESSURE_ITERATIONS: 20,
-    CURL: 30,         // You can change this starting value (e.g., 10, 50)
-    
-    // Splat (the effect created by mouse) settings
-    SPLAT_RADIUS: 0.23,
-    SPLAT_FORCE: 6000,
-    SPLAT_COUNT: Math.floor(Math.random() * 20) + 5,
-    
-    // Visuals and effects
-    SHADING: true,
-    COLORFUL: true,
-    COLOR_UPDATE_SPEED: 9,
-    BACK_COLOR: { r: 0, g: 0, b: 0 },
-    TRANSPARENT: false,
-    BLOOM: true,
-    BLOOM_ITERATIONS: 8,
-    BLOOM_RESOLUTION: 256,
-    BLOOM_INTENSITY: 0.8,
-    BLOOM_THRESHOLD: 0.6,
-    BLOOM_SOFT_KNEE: 0.7,
-    SUNRAYS: true,
-    SUNRAYS_RESOLUTION: 196,
-    SUNRAYS_WEIGHT: 1.0,
-  });
-
-})();
-    </script>
+    <script src="script.js"></script>
   </body>
 </html>
